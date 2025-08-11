@@ -7,10 +7,12 @@ cachetools==5.5.2
 certifi==2025.8.3
 charset-normalizer==3.4.3
 discord.py==2.5.2
+dotenv==0.9.9
 frozenlist==1.7.0
 google-auth==2.40.3
 google-auth-oauthlib==1.2.2
 gspread==6.2.1
+gspread-formatting==1.2.1
 httplib2==0.22.0
 idna==3.10
 multidict==6.6.3
@@ -20,6 +22,8 @@ propcache==0.3.2
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pyparsing==3.2.3
+python-dotenv==1.1.1
+pytz==2025.2
 requests==2.32.4
 requests-oauthlib==2.0.0
 rsa==4.9.1
