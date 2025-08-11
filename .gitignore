@@ -1,0 +1,13 @@
+# Virtual Environment
+venv/
+
+# Environment variables file
+.env
+
+# Google Cloud credentials
+credentials.json
+
+# Python cache
+__pycache__/
+*.pyc
+```    This ensures your `venv` folder and, most importantly, your `DISCORD_BOT_TOKEN` and your Google `credentials.json` are **never** uploaded to GitHub.
