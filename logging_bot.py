@@ -7,25 +7,7 @@ import pytz
 import os
 from dotenv import load_dotenv
 import functools
-from flask import Flask         # Import Flask
-from threading import Thread    # Import Thread
 
-# --- FLASK WEB SERVER FOR RENDER "KEEP-ALIVE" HACK ---
-app = Flask('')
-
-@app.route('/')
-def home():
-    return "The bot is alive!"
-
-def run():
-    # Render provides the PORT environment variable. Default to 8080 for local testing.
-    port = int(os.environ.get('PORT', 8080)) 
-    app.run(host='0.0.0.0', port=port)
-
-def keep_alive():
-    # Function to start the web server in a new thread
-    t = Thread(target=run)
-    t.start()
 
 # --- LOAD ENVIRONMENT VARIABLES ---
 load_dotenv() 
@@ -188,13 +170,11 @@ async def on_message(message):
             await message.channel.send(f"✅ Monthly statistics report has been generated! You can view it here: {sheet_url}")
         except Exception as e: await message.channel.send(f"❌ An error occurred while generating the report: {e}"); print(f"Statistics generation error: {e}")
 
-# --- RUN THE BOT AND THE WEB SERVER ---
+# --- RUN THE DISCORD BOT ---
 if not TOKEN:
     print("CRITICAL ERROR: DISCORD_BOT_TOKEN not found in environment variables.")
 else:
     try:
-        keep_alive() # Start the keep-alive server
-        print("Keep-alive server thread started.")
         client.run(TOKEN)
     except discord.errors.LoginFailure:
         print("CRITICAL ERROR: Improper token has been passed via environment variable.")
