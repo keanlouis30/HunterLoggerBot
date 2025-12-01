@@ -7,6 +7,8 @@ import pytz
 import os
 from dotenv import load_dotenv
 import functools
+import asyncio
+from aiohttp import web
 
 
 # --- LOAD ENVIRONMENT VARIABLES ---
@@ -143,6 +145,24 @@ def parse_sheet_data(all_values, target_month, target_year):
             except (ValueError, IndexError): continue
     return parsed_data
 
+# --- MINIMAL WEB SERVER FOR RENDER HEALTH CHECKS ---
+async def healthcheck(request):
+    return web.Response(text="OK", content_type="text/plain")
+
+async def start_web_server():
+    app = web.Application()
+    # Root and explicit /health endpoint for Render health checks
+    app.add_routes([
+        web.get('/', healthcheck),
+        web.get('/health', healthcheck),
+    ])
+    port = int(os.getenv("PORT", 10000))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, host="0.0.0.0", port=port)
+    await site.start()
+    print(f"Web server running on port {port}")
+
 # --- DISCORD BOT EVENTS ---
 @client.event
 async def on_ready():
@@ -170,11 +190,17 @@ async def on_message(message):
             await message.channel.send(f"✅ Monthly statistics report has been generated! You can view it here: {sheet_url}")
         except Exception as e: await message.channel.send(f"❌ An error occurred while generating the report: {e}"); print(f"Statistics generation error: {e}")
 
-# --- RUN THE DISCORD BOT ---
-if not TOKEN:
-    print("CRITICAL ERROR: DISCORD_BOT_TOKEN not found in environment variables.")
-else:
-    try:
-        client.run(TOKEN)
-    except discord.errors.LoginFailure:
-        print("CRITICAL ERROR: Improper token has been passed via environment variable.")
+# --- RUN THE WEB SERVER + DISCORD BOT (RENDER-FRIENDLY ENTRYPOINT) ---
+async def main():
+    # Start minimal web server for Render health checks, then run the Discord bot.
+    await start_web_server()
+    await client.start(TOKEN)
+
+if __name__ == "__main__":
+    if not TOKEN:
+        print("CRITICAL ERROR: DISCORD_BOT_TOKEN not found in environment variables.")
+    else:
+        try:
+            asyncio.run(main())
+        except discord.errors.LoginFailure:
+            print("CRITICAL ERROR: Improper token has been passed via environment variable.")
